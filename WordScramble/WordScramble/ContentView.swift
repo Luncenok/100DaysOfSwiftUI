@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var usedWords = [String]()
     @State private var rootWord = ""
     @State private var newWorld = ""
+    @State private var score = 0
     @State private var errorTitle = ""
     @State private var errorMessage = ""
     @State private var showingError = false
@@ -24,6 +25,7 @@ struct ContentView: View {
                 }
                 
                 Section {
+                    Text("Score: \(score)")
                     ForEach(usedWords, id: \.self) { word in
                         HStack{
                             Image(systemName: "\(word.count).circle")
@@ -40,12 +42,18 @@ struct ContentView: View {
             } message: {
                 Text(errorMessage)
             }
+            .toolbar {
+                Button("Restart game", action: startGame)
+            }
         }
     }
     
     func addNewWord() {
         let answer = newWorld.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        guard answer.count > 0 else {return}
+        guard answer.count > 2 || answer == rootWord else {
+            wordError(title: "Word too small or '\(rootWord)'", message: "3+ letters and be original")
+            return
+        }
         
         guard isOriginal(word: answer) else {
             wordError(title: "Word already used", message: "Be more original")
@@ -63,6 +71,7 @@ struct ContentView: View {
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
+        score += answer.count + usedWords.count
         newWorld = ""
     }
     
