@@ -26,6 +26,9 @@ struct ContentView: View {
     @State private var correctAnswer = Int.random(in: 0...2)
     @State private var score = 0
     @State private var gamesPlayed = 0
+    @State private var animationRotateAmount = [0.0, 0.0, 0.0]
+    @State private var animationFadeAmount = [1.0, 1.0, 1.0]
+    @State private var animationScaleAmount = [1.0, 1.0, 1.0]
     
     var body: some View {
         ZStack {
@@ -54,6 +57,9 @@ struct ContentView: View {
                         } label: {
                             FlagImage(country: countries[number])
                         }
+                        .scaleEffect(animationScaleAmount[number])
+                        .opacity(animationFadeAmount[number])
+                        .rotation3DEffect(.degrees(animationRotateAmount[number]), axis: (x: 0, y: 1, z: 0))
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -89,6 +95,17 @@ struct ContentView: View {
         } else {
             scoreTitle = "Wrong! That is the flag of \(countries[number])"
         }
+        withAnimation {
+            animationRotateAmount[number] += 360
+        }
+        for num in 0...2 {
+            if num != number {
+                withAnimation {
+                    animationFadeAmount[num] = 0.25
+                    animationScaleAmount[num] = 0.75
+                }
+            }
+        }
         gamesPlayed += 1
         showingScore = true
         if gamesPlayed == 8 {
@@ -107,6 +124,9 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        animationRotateAmount = [0.0, 0.0, 0.0]
+        animationFadeAmount = [1.0, 1.0, 1.0]
+        animationScaleAmount = [1.0, 1.0, 1.0]
     }
 }
 
