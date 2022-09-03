@@ -18,11 +18,11 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                Text("Some text is copied from Wikipedia \nCopyright © Wikipedia")
+                Text("Some text is copied from Wikipedia \nCopyright © Wikipedia CC-BY-SA license")
                 LazyVGrid(columns: columns) {
                     ForEach(missions) { mission in
                         NavigationLink {
-                            Text("Detail view")
+                            MissionView(mission: mission, astronauts: astronauts)
                         } label: {
                             VStack {
                                 Image(mission.image)
