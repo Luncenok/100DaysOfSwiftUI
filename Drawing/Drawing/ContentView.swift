@@ -157,6 +157,55 @@ struct Checkerboard: Shape {
     }
 }
 
+struct Arrow: InsettableShape {
+    var insetAmount = 0.0
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.maxY - insetAmount))
+        path.addLine(to: CGPoint(x: rect.minX + insetAmount*2, y: rect.midY + insetAmount))
+        path.addLine(to: CGPoint(x: rect.midX - 20.0 + insetAmount, y: rect.midY + insetAmount))
+        path.addLine(to: CGPoint(x: rect.midX - 20.0 + insetAmount, y: rect.minY + insetAmount))
+        path.addLine(to: CGPoint(x: rect.midX + 20.0 - insetAmount, y: rect.minY + insetAmount))
+        path.addLine(to: CGPoint(x: rect.midX + 20.0 - insetAmount, y: rect.midY + insetAmount))
+        path.addLine(to: CGPoint(x: rect.maxX - insetAmount*2, y: rect.midY + insetAmount))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY - insetAmount))
+        path.closeSubpath()
+        return path
+    }
+    
+    func inset(by amount: CGFloat) -> some InsettableShape {
+        var arrow = self
+        arrow.insetAmount = amount
+        return arrow
+    }
+}
+
+struct ColorCyclingArrow: View {
+    var amount = 0.0
+    var steps = 20
+    var body: some View {
+        ZStack {
+            ForEach(0..<steps) {num in
+                Arrow()
+                    .inset(by: Double(num))
+                    .stroke(color(for: num), lineWidth: 2)
+            }
+        }
+    }
+    
+    func color(for value: Int) -> Color {
+        var targetHue = Double(value) / Double(steps) + amount
+        
+        if targetHue > 1 {
+            targetHue -= 1
+        }
+        
+        return Color(hue: targetHue, saturation: 1, brightness: 1)
+        
+    }
+}
+
 struct ContentView: View {
     @State private var petalOffset = -50.0
     @State private var petalWidth = 50.0
@@ -166,11 +215,25 @@ struct ContentView: View {
     @State private var insetAmount = 50.0
     @State private var rows = 4
     @State private var columns = 4
+    @State private var lineWidth = 20.0
+    @State private var arrowCycle = 20.0
     
     var body: some View {
         ScrollView {
             VStack {
                 VStack {
+                    ColorCyclingArrow(amount: arrowCycle)
+                        .frame(width: 200, height: 200)
+                    Slider(value: $arrowCycle)
+                    Arrow()
+                        .stroke(.mint, lineWidth: lineWidth)
+                        .frame(width: 200, height: 200)
+                        .padding(30)
+                        .onTapGesture {
+                            withAnimation {
+                                lineWidth = Double.random(in: 2.0...30.0)
+                            }
+                        }
                     Checkerboard(rows: rows, columns: columns)
                         .fill(.cyan)
                         .frame(width: 300, height: 300)
